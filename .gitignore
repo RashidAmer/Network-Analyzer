@@ -1,0 +1,42 @@
+# C/C++
+*.o
+*.a
+*.so
+*.dylib
+*.dSYM/
+a.out
+vgcore.*
+src/c/sniffer
+
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.coverage
+htmlcov/
+.env
+venv/
+env/
+*.egg-info/
+
+# Node.js
+node_modules/
+npm-debug.log
+.next/
+out/
+build/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Docker
+.docker/
+
+# Env
+.env.local
+.env.*.local

@@ -1,0 +1,39 @@
+version: "3.9"
+
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      - INTERFACE=${INTERFACE:-any}
+      - DB_PATH=/app/data/metrics.db
+      - PORT=8000
+      - FLUSH_INTERVAL=${FLUSH_INTERVAL:-5}
+      - ROLLING_WINDOW=${ROLLING_WINDOW:-10}
+    volumes:
+      - db_data:/app/data
+    # Packet sniffing requires host network access
+    network_mode: host
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./src/frontend
+      dockerfile: Dockerfile.frontend
+    ports:
+      - "3000:3000"
+    environment:
+      - REACT_APP_API_URL=http://localhost:8000
+      - REACT_APP_WS_URL=ws://localhost:8000
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+volumes:
+  db_data:

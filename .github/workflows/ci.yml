@@ -1,0 +1,52 @@
+name: CI
+
+on:
+  push:
+    branches: [main, dev]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build-c:
+    name: Build & Test C Sniffer
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install libpcap
+        run: sudo apt-get update && sudo apt-get install -y libpcap-dev
+
+      - name: Compile sniffer
+        run: gcc -O2 -Wall -Wextra -o sniffer src/c/sniffer.c -lpcap
+
+      - name: Run C unit tests
+        run: |
+          gcc -O2 -Wall -o test_sniffer tests/unit/test_sniffer.c src/c/sniffer.c -lpcap
+          ./test_sniffer
+
+  test-python:
+    name: Test Python Backend
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install -r src/python/requirements.txt
+
+      - name: Run pytest
+        run: pytest tests/ -v
+
+  docker-build:
+    name: Docker Build
+    runs-on: ubuntu-latest
+    needs: [build-c, test-python]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build Docker image
+        run: docker build -t network-analyzer .
