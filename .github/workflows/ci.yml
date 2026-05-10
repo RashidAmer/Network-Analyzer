@@ -21,7 +21,7 @@ jobs:
 
       - name: Run C unit tests
         run: |
-          gcc -O2 -Wall -o test_sniffer tests/unit/test_sniffer.c src/c/sniffer.c -lpcap
+          gcc -O2 -Wall -std=gnu11 -D_DEFAULT_SOURCE -o test_sniffer tests/unit/test_sniffer.c src/c/sniffer.c -lpcap
           ./test_sniffer
 
   test-python:
