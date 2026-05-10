@@ -203,7 +203,6 @@ static void packet_handler(uint8_t *user,
     /* ── ARP ── */
     if (ether_type == ETHERTYPE_ARP) {
         ps.protocol = PROTO_ARP;
-        g_stats.other_count++;
         goto emit;
     }
 
@@ -294,11 +293,19 @@ static void packet_handler(uint8_t *user,
         inet_ntop(AF_INET6, &ip6h->ip6_src, ps.src_ip, sizeof(ps.src_ip));
         inet_ntop(AF_INET6, &ip6h->ip6_dst, ps.dst_ip, sizeof(ps.dst_ip));
         /* Simplified: classify by next header only */
-        if (ip6h->ip6_nxt == IPPROTO_TCP)       ps.protocol = PROTO_TCP;
-        else if (ip6h->ip6_nxt == IPPROTO_UDP)  ps.protocol = PROTO_UDP;
-        else if (ip6h->ip6_nxt == IPPROTO_ICMPV6) ps.protocol = PROTO_ICMP;
-        else                                     ps.protocol = PROTO_OTHER;
-        g_stats.other_count++;  /* counted under 'other' for IPv6 simplicity */
+        if (ip6h->ip6_nxt == IPPROTO_TCP) {
+            ps.protocol = PROTO_TCP;
+            g_stats.tcp_count++;
+        } else if (ip6h->ip6_nxt == IPPROTO_UDP) {
+            ps.protocol = PROTO_UDP;
+            g_stats.udp_count++;
+        } else if (ip6h->ip6_nxt == IPPROTO_ICMPV6) {
+            ps.protocol = PROTO_ICMP;
+            g_stats.icmp_count++;
+        } else {
+            ps.protocol = PROTO_OTHER;
+            g_stats.other_count++;
+        }
     } else {
         g_stats.other_count++;
     }

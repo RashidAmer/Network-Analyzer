@@ -11,23 +11,26 @@ top_talkers : per-source-IP byte/packet totals
 
 import os
 import aiosqlite
+from contextlib import asynccontextmanager
 from pathlib import Path
 
 DB_PATH    = os.getenv("DB_PATH", "./data/metrics.db")
 MAX_PACKETS = 50_000   # rolling cap — older rows pruned automatically
 
 
-async def get_db() -> aiosqlite.Connection:
+@asynccontextmanager
+async def get_db():
+    """Async context manager that yields a configured aiosqlite connection."""
     Path(DB_PATH).parent.mkdir(parents=True, exist_ok=True)
-    db = await aiosqlite.connect(DB_PATH)
-    db.row_factory = aiosqlite.Row
-    await db.execute("PRAGMA journal_mode=WAL")
-    await db.execute("PRAGMA synchronous=NORMAL")
-    return db
+    async with aiosqlite.connect(DB_PATH) as db:
+        db.row_factory = aiosqlite.Row
+        await db.execute("PRAGMA journal_mode=WAL")
+        await db.execute("PRAGMA synchronous=NORMAL")
+        yield db
 
 
 async def init_db():
-    async with await get_db() as db:
+    async with get_db() as db:
         await db.executescript("""
             CREATE TABLE IF NOT EXISTS packets (
                 id          INTEGER PRIMARY KEY AUTOINCREMENT,

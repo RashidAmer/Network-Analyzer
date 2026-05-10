@@ -25,7 +25,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 from database import (
-    init_db, get_db,
+    init_db, get_db, DB_PATH,
     insert_packet, insert_stats,
     query_metrics, query_flows, query_top_talkers,
     query_recent_packets, query_timeseries, query_latest_stats,
@@ -82,7 +82,10 @@ async def read_sniffer_output(proc: subprocess.Popen):
     Inserts packet records into SQLite and broadcasts to WebSocket clients.
     """
     global sniffer_ready
-    db: aiosqlite.Connection = await get_db()
+    db = await aiosqlite.connect(DB_PATH)
+    db.row_factory = aiosqlite.Row
+    await db.execute("PRAGMA journal_mode=WAL")
+    await db.execute("PRAGMA synchronous=NORMAL")
 
     try:
         loop = asyncio.get_event_loop()
@@ -215,7 +218,7 @@ async def health():
 
 @app.get("/api/metrics")
 async def get_metrics(window: int = Query(0, description="Seconds (0=all)")):
-    async with await get_db() as db:
+    async with get_db() as db:
         metrics   = await query_metrics(db, window)
         latest    = await query_latest_stats(db)
         timeseries = await query_timeseries(db, seconds=60)
@@ -229,14 +232,14 @@ async def get_metrics(window: int = Query(0, description="Seconds (0=all)")):
 
 @app.get("/api/flows")
 async def get_flows(limit: int = Query(100, le=1000)):
-    async with await get_db() as db:
+    async with get_db() as db:
         flows = await query_flows(db, limit)
     return {"flows": flows, "count": len(flows)}
 
 
 @app.get("/api/protocols")
 async def get_protocols():
-    async with await get_db() as db:
+    async with get_db() as db:
         metrics = await query_metrics(db)
     total = metrics.get("total_packets") or 1
     protos = metrics.get("protocols", {})
@@ -256,7 +259,7 @@ async def get_protocols():
 
 @app.get("/api/top-talkers")
 async def get_top_talkers(limit: int = Query(10, le=100)):
-    async with await get_db() as db:
+    async with get_db() as db:
         talkers = await query_top_talkers(db, limit)
     return {"top_talkers": talkers}
 
@@ -266,7 +269,7 @@ async def get_packets(
     limit: int = Query(50, le=500),
     protocol: Optional[str] = Query(None),
 ):
-    async with await get_db() as db:
+    async with get_db() as db:
         packets = await query_recent_packets(db, limit, protocol)
     return {"packets": packets, "count": len(packets)}
 
