@@ -39,7 +39,7 @@ jobs:
         run: pip install -r src/python/requirements.txt
 
       - name: Run pytest
-        run: pytest tests/ -v
+        run: PYTHONPATH=. pytest tests/ -v
 
   docker-build:
     name: Docker Build

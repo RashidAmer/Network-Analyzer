@@ -17,15 +17,15 @@ It was built to demonstrate:
 
 ## Features
 
-- ✅ Packet capture on any network interface using libpcap (promiscuous mode)
-- ✅ Protocol identification: TCP, UDP, DNS, HTTP, HTTPS, ICMP, ARP
-- ✅ DNS query name extraction and HTTP Host header parsing
-- ✅ Rolling 10-second bytes/packets-per-second calculation
-- ✅ Top talkers by byte volume (source IP ranking)
-- ✅ Network flow aggregation (src IP → dst IP:port pairs)
-- ✅ Live WebSocket stream for real-time dashboard updates
-- ✅ SQLite persistence (survives backend restarts)
-- ✅ Auto-restart if sniffer subprocess crashes
+- Packet capture on any network interface using libpcap (promiscuous mode)
+- Protocol identification: TCP, UDP, DNS, HTTP, HTTPS, ICMP, ARP
+- DNS query name extraction and HTTP Host header parsing
+- Rolling 10-second bytes/packets-per-second calculation
+- Top talkers by byte volume (source IP ranking)
+- Network flow aggregation (src IP → dst IP:port pairs)
+- Live WebSocket stream for real-time dashboard updates
+- SQLite persistence (survives backend restarts)
+- Auto-restart if sniffer subprocess crashes
 
 ## Quick Start
 

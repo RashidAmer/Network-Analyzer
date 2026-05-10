@@ -6,12 +6,13 @@ Run with:
 """
 
 import pytest
+import pytest_asyncio
 from httpx import AsyncClient, ASGITransport
 
 
 # ── Fixtures ──────────────────────────────────────────────────────────────
 
-@pytest.fixture
+@pytest_asyncio.fixture
 async def client():
     """
     Returns an async test client.
